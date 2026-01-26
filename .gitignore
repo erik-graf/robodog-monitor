@@ -8,3 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+bin/
+lib/
+lib64
+pyvenv.cfg
+
+# Operational files
+gps_data.db

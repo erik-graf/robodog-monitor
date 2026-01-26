@@ -52,6 +52,12 @@ h2 {
     text-shadow: 0 0 5px rgba(37, 143, 255);
 }
 
+#current-msg {
+    font-size: 1.3rem;
+    color: #257fff;
+    text-shadow: 0 0 5px rgba(37, 143, 255);
+}
+
 .visualization-container {
     background-color: #0b1014;
     border: 1px solid #3c4a56;
