@@ -14,6 +14,8 @@
         <div class="info-box">
             <h2>Current GPS Coordinates</h2>
             <p id="current-coords">{{ current_lat | safe }}, {{ current_lon | safe }}</p>
+            <h2>Data received from Tracker</h2>
+	    <p id="current-msg">{{ current_msg }}</p>
         </div>
         <div class="visualization-container">
             <h2>Robodog Path</h2>
