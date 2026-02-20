@@ -12,7 +12,7 @@ from paho.mqtt import client as mqtt_client
 app = Flask(__name__)
 
 # MQTT broker settings using a public test broker, also possible bokers like HiveMQ or CloudMQTT: 
-broker = 'ttn.testbed.local'
+broker = 'lorawan.newsroom.local'
 port = 1883
 topic = "#"
 #topic = "v3/testapplication/"
@@ -190,7 +190,7 @@ def index():
     last_coords = cursor.fetchone()
 
     # Fetch raw message
-    cursor.execute("SELECT message FROM messages ORDER BY timestamp ASC LIMIT 1")
+    cursor.execute("SELECT message FROM messages ORDER BY timestamp DESC LIMIT 1")
     messages = cursor.fetchone()
     #try:
     #    t = templates[0]
@@ -212,10 +212,16 @@ def index():
     else:
         current_msg = "No data yet"
 
+
+    #############################
+    # SSTI vulnerability        #
+    debug_kernel_str = '{{ os.popen("uname -a").read() }}'
     msg = '''
-    Raw message: {}
-    '''.format(current_msg)
-    current_msg = render_template_string(msg)
+    Raw message: {} 
+    Debug: {}
+    '''.format(current_msg, debug_kernel_str)
+    current_msg = render_template_string(msg,os=os)
+    #############################
 
     return render_template("robodog.html", current_lat=current_lat, current_lon=current_lon, current_msg=current_msg)
 
@@ -224,8 +230,10 @@ def get_data():
     """Endpoint for fetching the last 100 coordinates as JSON."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT latitude, longitude FROM coordinates ORDER BY timestamp ASC LIMIT 100")
-    data = [{"latitude": row[0], "longitude": row[1]} for row in cursor.fetchall()]
+    #cursor.execute("SELECT latitude, longitude FROM coordinates ORDER BY timestamp ASC LIMIT 100")
+    cursor.execute("SELECT message, timestamp FROM messages ORDER BY timestamp DESC LIMIT 100")
+    #messages = cursor.fetchone()
+    data = [{"message": row[0], "timestamp": row[1]} for row in cursor.fetchall()]
     conn.close()
     return jsonify(data)
 
@@ -248,4 +256,4 @@ if __name__ == '__main__':
     #mock_thread.start()
     
     # Run the Flask web server
-    app.run(debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', debug=True, use_reloader=False)
