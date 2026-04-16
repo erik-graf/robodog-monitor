@@ -43,6 +43,7 @@ function toCanvas(lat, lon) {
 }
 
 const history = [];
+const MAX_DOTS = 10;
 
 async function updateCoordinates() {
     try {
@@ -51,9 +52,14 @@ async function updateCoordinates() {
 
         if (data.length > 0) {
             const latest = data[data.length - 1];
-            currentCoordsDisplay.textContent = `Lat: ${latest.latitude}, Lon: ${latest.longitude}`;
+            currentCoordsDisplay.textContent =
+                `Lat: ${latest.latitude}, Lon: ${latest.longitude}`;
+
+            const lastPoints = data.slice(-MAX_DOTS);
+
             history.length = 0;
-            history.push(...data);
+            history.push(...lastPoints);
+
             drawPath();
         }
     } catch (error) {
@@ -61,6 +67,23 @@ async function updateCoordinates() {
     }
 }
 
+// async function updateCoordinates() {
+//     try {
+//         const response = await fetch('/data');
+//         const data = await response.json();
+// 
+//         if (data.length > 0) {
+//             const latest = data[data.length - 1];
+//             currentCoordsDisplay.textContent = `Lat: ${latest.latitude}, Lon: ${latest.longitude}`;
+//             history.length = 0;
+//             history.push(...data);
+//             drawPath();
+//         }
+//     } catch (error) {
+//         console.error("Failed to fetch coordinates:", error);
+//     }
+// }
+// 
 function drawPath() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -101,16 +124,27 @@ function drawPath() {
     ctx.closePath();
     ctx.stroke();
 
-    // Draw actual GPS path (dots, fading older points)
-    history.forEach((point, index) => {
-        const { x, y } = toCanvas(point.latitude, point.longitude);
-        const opacity = (index + 1) / history.length;
-        ctx.fillStyle = `rgba(37, 143, 255, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-    });
+history.forEach((point, index) => {
+    const { x, y } = toCanvas(point.latitude, point.longitude);
+    const isNewest = index === history.length - 1;
+    const opacity = 0.1 + 0.9 * (index / Math.max(history.length - 1, 1));
+
+    ctx.fillStyle = `rgba(37, 143, 255, ${opacity})`;
+    ctx.beginPath();
+    ctx.arc(x, y, isNewest ? 6 : 5, 0, Math.PI * 2);
+    ctx.fill();
+});
+
+  //  // Draw actual GPS path (dots, fading older points)
+  //  history.forEach((point, index) => {
+  //      const { x, y } = toCanvas(point.latitude, point.longitude);
+  //      const opacity = (index) / (history.length);
+  //      ctx.fillStyle = `rgba(37, 143, 255, ${opacity})`;
+  //      ctx.beginPath();
+  //      ctx.arc(x, y, 5, 0, Math.PI * 2);
+  //      ctx.fill();
+  //      ctx.closePath();
+  //  });
 
     // Draw cameras as numbered circles (on top of path dots)
     CAMERAS.forEach(cam => {
@@ -128,6 +162,6 @@ function drawPath() {
 }
 
 // Start fetch data every 2 seconds to match publish interval
-setInterval(updateCoordinates, 2000);
-setTimeout(updateCoordinates, 1000);
+setInterval(updateCoordinates, 1000);
+setTimeout(updateCoordinates, 500);
 updateCoordinates();
