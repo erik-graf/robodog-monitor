@@ -25,22 +25,22 @@ const RECT = [
     { lat: 48.2075, lon: 16.3778 },
 ];
 
-// 7 surveillance cameras — camera 7 is the deviation point
+// Points of interest — powerplant site
 const CAMERAS = [
-    { lat: 48.2075, lon: 16.3728, id: 1 },
-    { lat: 48.2112, lon: 16.3728, id: 2 },
-    { lat: 48.2112, lon: 16.3778, id: 3 },
-    { lat: 48.2075, lon: 16.3778, id: 4 },
-    { lat: 48.2094, lon: 16.3715, id: 5 },
-    { lat: 48.2094, lon: 16.3792, id: 6 },
-    { lat: 48.2060, lon: 16.3753, id: 7 },
-    { lat: 48.2052, lon: 16.3722, id: 8 },
-    { lat: 48.2052, lon: 16.3782, id: 9 },
-    { lat: 48.2120, lon: 16.3750, id: 10 },
-    { lat: 48.2085, lon: 16.3753, id: 11 },
-    { lat: 48.2048, lon: 16.3753, id: 12 },
-    { lat: 48.2075, lon: 16.3710, id: 13 },
-    { lat: 48.2112, lon: 16.3710, id: 14 },
+    { lat: 48.2075, lon: 16.3728, id: 1,  label: 'Generator',         dx:  -5, dy:  22 },
+    { lat: 48.2112, lon: 16.3728, id: 2,  label: 'Generator',         dx:  -5, dy: -22 },
+    { lat: 48.2112, lon: 16.3778, id: 3,  label: 'Generator',         dx:   5, dy: -22 },
+    { lat: 48.2075, lon: 16.3778, id: 4,  label: 'Generator',         dx:   5, dy:  22 },
+    { lat: 48.2094, lon: 16.3715, id: 5,  label: 'Emergency Shutoff', dx:   0, dy:  22 },
+    { lat: 48.2094, lon: 16.3792, id: 6,  label: 'Gate',              dx:   0, dy:  22 },
+    { lat: 48.2060, lon: 16.3753, id: 7,  label: 'Control Room',      dx:   0, dy:  22 },
+    { lat: 48.2052, lon: 16.3722, id: 8,  label: 'Fuel Storage',      dx:   0, dy:  22 },
+    { lat: 48.2052, lon: 16.3782, id: 9,  label: 'Waste Handling',    dx:   0, dy:  22 },
+    { lat: 48.2120, lon: 16.3750, id: 10, label: 'Cooling',           dx:   0, dy: -22 },
+    { lat: 48.2085, lon: 16.3753, id: 11, label: 'Reactor',           dx:   0, dy: -22 },
+    { lat: 48.2048, lon: 16.3753, id: 12, label: 'Control Panels',    dx:   0, dy:  22 },
+    { lat: 48.2075, lon: 16.3710, id: 13, label: 'Perimeter Sensor',  dx:   0, dy:  22 },
+    { lat: 48.2112, lon: 16.3710, id: 14, label: 'Transformer',       dx:   0, dy:  22 },
 ];
 
 function toCanvas(lat, lon) {
@@ -153,18 +153,33 @@ history.forEach((point, index) => {
   //      ctx.closePath();
   //  });
 
-    // Draw cameras as numbered circles (on top of path dots)
+    // Draw POIs as numbered circles with labels
     CAMERAS.forEach(cam => {
         const { x, y } = toCanvas(cam.lat, cam.lon);
+
+        // Circle
         ctx.fillStyle = 'rgba(180, 50, 50, 0.85)';
         ctx.beginPath();
         ctx.arc(x, y, 12, 0, Math.PI * 2);
         ctx.fill();
+
+        // ID number inside circle
         ctx.fillStyle = 'white';
         ctx.font = 'bold 11px Courier New';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(cam.id, x, y);
+
+        // Label offset from circle
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.95)';
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = 'white';
+        ctx.font = '9px Courier New';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(cam.label, x + cam.dx, y + cam.dy);
+        ctx.restore();
     });
 }
 
